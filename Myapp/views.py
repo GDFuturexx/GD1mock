@@ -12,3 +12,8 @@ def del_project(request, pid):
     # print(pid)
     DB_project.objects.filter(id=pid).delete()
     return HttpResponseRedirect('/project_list/')
+
+# 进入登录页面
+def login(request):
+
+    return render(request, 'login.html')

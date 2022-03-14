@@ -19,6 +19,7 @@ from Myapp.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('project_list/', project_list),
+    path('project_list/', project_list),  # 项目列表页
     re_path('del_project/(?P<pid>.+)/', del_project),  # 删除项目
+    path('login/', login),  # 进入登录页面
 ]
