@@ -21,5 +21,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('project_list/', project_list),  # 项目列表页
     re_path('del_project/(?P<pid>.+)/', del_project),  # 删除项目
-    path('login/', login),  # 进入登录页面
+    path('login/', login),  # 登录注册页面
+    path('logout/', logout),  # 注销退出登录页面
+    path('accounts/login/', login),  # 当没有登录态的时候访问的登录注册页面
+    path('sign_in/', sign_in),  # 登录动作
+    path('sign_up/', sign_up),  # 注册动作
 ]

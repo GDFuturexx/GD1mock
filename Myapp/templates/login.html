@@ -54,34 +54,54 @@
     </ul>
     <div class="tab-content" style="padding-top: 30px;width: 80%;margin-left: 10%">
         <div class="tab-pane active" id="IN">
-            <span>USERNAME</span> <br>
-            <input type="text" autocomplete=”off”>
-            <br><br>
-            <span>PASSWORD</span><br>
-            <input type="password" autocomplete="new-password">
-            <br><br>
-            <a href="" style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
-            <br><br>
-            <button class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN IN</button>
-            <br><br><br>
+            <form action="/sign_in/">
+                <span>USERNAME</span> <br>
+                <input type="text" autocomplete=”off” name="in_username">
+                <br><br>
+                <span>PASSWORD</span><br>
+                <input type="password" autocomplete="new-password" name="in_password">
+                <br><br>
+                <a href="" style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
+                <br><br>
+                <button type="submit" class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN IN</button>
+                <br><br><br>
+            </form>
         </div>
         <div class="tab-pane" id="UP">
-            <span>USERNAME</span> <br>
-            <input type="text" autocomplete=”off”>
-            <br><br>
-            <span>PASSWORD</span> <br>
-            <input type="password" autocomplete=”off”>
-            <br><br>
-            <span>RE-TYPE PASSWORD</span> <br>
-            <input type="password" autocomplete=”off”>
-            <br><br>
-            <span>EMAIL</span> <br>
-            <input type="email" autocomplete=”off”>
-            <br><br>
-            <button class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN UP</button>
-            <br><br><br>
+            <form action="/sign_up/">
+                <span>USERNAME</span> <br>
+                <input type="text" autocomplete=”off” name="up_username">
+                <br><br>
+                <span>PASSWORD</span> <br>
+                <input type="password" id="up_password" autocomplete=”off” name="up_password">
+                <br><br>
+                <span>RE-TYPE PASSWORD</span> <br>
+<!--                <input type="password" id="re_up_password" autocomplete=”off” onblur="check_pwd()">-->
+                <input type="password" id="re_up_password" autocomplete=”off” oninput="check_pwd()">
+                <br><br>
+                <span>EMAIL</span> <br>
+                <input type="email" autocomplete=”off” name="up_email">
+                <br><br>
+                <button type="submit" disabled id="sign_up" class="btn btn-danger"
+                        style="border-radius: 20px;width: 100%">SIGN UP
+                </button>
+                <br><br><br>
+            </form>
         </div>
     </div>
 </div>
+<script>
+    function check_pwd() {
+        // 获取两个密码输入框内容
+        var pwd = document.getElementById('up_password').value;
+        var re_pwd = document.getElementById('re_up_password').value;
+        // 比较两个密码输入框内容是否一致，若一致解锁注册按钮
+        if (pwd != re_pwd) {
+            document.getElementById('sign_up').disabled = true;
+        } else {
+            document.getElementById('sign_up').disabled = false;
+        }
+    }
+</script>
 </body>
 </html>
