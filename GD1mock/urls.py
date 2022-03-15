@@ -26,4 +26,6 @@ urlpatterns = [
     path('accounts/login/', login),  # 当没有登录态的时候访问的登录注册页面
     path('sign_in/', sign_in),  # 登录动作
     path('sign_up/', sign_up),  # 注册动作
+    path('reset_password/', reset_password),  # 重设密码
+    path('send_email_pwd/', send_email_pwd),  # 发送验证码邮件
 ]

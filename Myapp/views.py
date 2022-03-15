@@ -1,6 +1,11 @@
+import random
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.http import HttpResponse
 from django.shortcuts import render,HttpResponseRedirect
 from Myapp.models import *
 
@@ -59,3 +64,34 @@ def sign_up(request):
     except:
         # 注册失败
         return HttpResponseRedirect('/login/')
+
+# 重设密码
+def reset_password(request):
+    # 获取用户名,验证码，新密码
+    username = request.GET['fg_username']
+    code = request.GET['fg_code']
+    password = request.GET['fg_password']
+    # 判断验证码
+    check_code = User.objects.filter(username=username)[0].last_name
+    if code == check_code:
+        User.objects.filter(username=username).update(password=make_password(password))
+        return HttpResponseRedirect('/login/')
+    else:
+        return HttpResponse('Verification code is not correct !')
+
+# 发送验证码邮件
+def send_email_pwd(request):
+    # 获取用户名
+    username = request.GET['username']
+    # 根据用户名去数据库用户表获取对应邮箱
+    email = User.objects.filter(username=username)[0].email
+    # 生成随机验证码
+    code = str(random.randint(1000,9999))
+    # 保存验证码
+    User.objects.filter(username=username).update(last_name=code)
+    # 发送邮件
+    # print(code)
+    msg = '这是您找回密码的验证码：' + code
+    send_mail('mock平台找回密码', msg, settings.EMAIL_FROM, [email])
+    # 返回 yes
+    return HttpResponse('yes')

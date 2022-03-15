@@ -55,13 +55,14 @@
     <div class="tab-content" style="padding-top: 30px;width: 80%;margin-left: 10%">
         <div class="tab-pane active" id="IN">
             <form action="/sign_in/">
-                <span>USERNAME</span> <br>
+                <span>USERNAME</span><br>
                 <input type="text" autocomplete=”off” name="in_username">
                 <br><br>
                 <span>PASSWORD</span><br>
                 <input type="password" autocomplete="new-password" name="in_password">
                 <br><br>
-                <a href="" style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
+                <a href="#FORGOT" data-toggle="tab"
+                   style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
                 <br><br>
                 <button type="submit" class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN IN</button>
                 <br><br><br>
@@ -76,7 +77,7 @@
                 <input type="password" id="up_password" autocomplete=”off” name="up_password">
                 <br><br>
                 <span>RE-TYPE PASSWORD</span> <br>
-<!--                <input type="password" id="re_up_password" autocomplete=”off” onblur="check_pwd()">-->
+                <!--<input type="password" id="re_up_password" autocomplete=”off” onblur="check_pwd()">-->
                 <input type="password" id="re_up_password" autocomplete=”off” oninput="check_pwd()">
                 <br><br>
                 <span>EMAIL</span> <br>
@@ -85,6 +86,23 @@
                 <button type="submit" disabled id="sign_up" class="btn btn-danger"
                         style="border-radius: 20px;width: 100%">SIGN UP
                 </button>
+                <br><br><br>
+            </form>
+        </div>
+        <div class="tab-pane" id="FORGOT">
+            <form action="/reset_password/">
+                <span>username which your forgot</span><br>
+                <input type="text" autocomplete=”off” name="fg_username" id="fg_username">
+                <br><br>
+                <button type="button" onclick="send_email()" class="btn btn-default" style="border-radius: 20px;width: 100%">send email to get your email's code</button>
+                <br><br>
+                <span>your email's code</span>
+                <input type="text" autocomplete=”off” name="fg_code">
+                <br><br>
+                <span>your new password</span><br>
+                <input type="text" autocomplete=”new-password” name="fg_password">
+                <br><br>
+                <button type="submit" class="btn btn-danger" style="border-radius: 20px;width: 100%">Submit</button>
                 <br><br><br>
             </form>
         </div>
@@ -101,6 +119,17 @@
         } else {
             document.getElementById('sign_up').disabled = false;
         }
+    }
+    function send_email() {
+        $.get("/send_email_pwd/",{
+            "username": document.getElementById("fg_username").value
+        },function (ret){
+            if(ret == 'yes'){
+                alert('send success!')
+            }else{
+                alert('send fail!')
+            }
+        })
     }
 </script>
 </body>
