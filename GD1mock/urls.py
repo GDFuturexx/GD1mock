@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('project_list/', project_list),  # 项目列表页
     path('add_project/', add_project),  # 新增项目
+    path('save_project/', save_project),  # 保存项目
     re_path('del_project/(?P<pid>.+)/', del_project),  # 删除项目
     path('login/', login),  # 登录注册页面
     path('logout/', logout),  # 注销退出登录页面

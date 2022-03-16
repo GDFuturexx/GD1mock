@@ -54,19 +54,18 @@
     </ul>
     <div class="tab-content" style="padding-top: 30px;width: 80%;margin-left: 10%">
         <div class="tab-pane active" id="IN">
-            <form action="/sign_in/">
-                <span>USERNAME</span><br>
-                <input type="text" autocomplete=”off” name="in_username">
-                <br><br>
-                <span>PASSWORD</span><br>
-                <input type="password" autocomplete="new-password" name="in_password">
-                <br><br>
-                <a href="#FORGOT" data-toggle="tab"
-                   style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
-                <br><br>
-                <button type="submit" class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN IN</button>
-                <br><br><br>
-            </form>
+            <span>USERNAME</span> <br>
+            <input type="text" autocomplete=”off” id="in_username">
+            <br><br>
+            <span>PASSWORD</span><br>
+            <input type="password" autocomplete="new-password" id="in_password">
+            <br><br>
+            <a href="#FORGOT" data-toggle="tab"
+               style="font-size: xx-small;float: right;margin-right: 20px;color: white">Forgot Password</a>
+            <br><br>
+            <button onclick="sign_in_fc()" class="btn btn-danger" style="border-radius: 20px;width: 100%">SIGN IN
+            </button>
+            <br><br><br>
         </div>
         <div class="tab-pane" id="UP">
             <form action="/sign_up/">
@@ -94,7 +93,9 @@
                 <span>username which your forgot</span><br>
                 <input type="text" autocomplete=”off” name="fg_username" id="fg_username">
                 <br><br>
-                <button type="button" onclick="send_email()" class="btn btn-default" style="border-radius: 20px;width: 100%">send email to get your email's code</button>
+                <button type="button" onclick="send_email()" class="btn btn-default"
+                        style="border-radius: 20px;width: 100%">send email to get your email's code
+                </button>
                 <br><br>
                 <span>your email's code</span>
                 <input type="text" autocomplete=”off” name="fg_code">
@@ -120,14 +121,33 @@
             document.getElementById('sign_up').disabled = false;
         }
     }
+
     function send_email() {
-        $.get("/send_email_pwd/",{
+        $.get("/send_email_pwd/", {
             "username": document.getElementById("fg_username").value
-        },function (ret){
-            if(ret == 'yes'){
+        }, function (ret) {
+            if (ret == 'yes') {
                 alert('send success!')
-            }else{
+            } else {
                 alert('send fail!')
+            }
+        })
+    }
+
+    function sign_in_fc() {
+        if (document.getElementById('in_username').value == '') {
+            alert('请输入用户名！')
+            return
+        }
+        // 提交给后端
+        $.post('/sign_in/', {
+            'in_username': document.getElementById('in_username').value,
+            'in_password': document.getElementById('in_password').value,
+        }, function (abc) {
+            if (abc == '1') {
+                document.location.href = '/project_list/'
+            } else {
+                alert('用户名密码错误！')
             }
         })
     }

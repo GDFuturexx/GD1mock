@@ -29,6 +29,14 @@ def add_project(request):
     return HttpResponseRedirect('/project_list/')
 
 
+# 保存项目
+def save_project(request):
+    new_name = request.GET['new_name']
+    project_id = request.GET['project_id']
+    DB_project.objects.filter(id=project_id).update(name=new_name)
+    return HttpResponse('')
+
+
 # 删除项目
 def del_project(request, pid):
     # print(pid)
@@ -45,18 +53,19 @@ def login(request):
 # 登录
 def sign_in(request):
     # 获取来自页面用户输入的用户名和密码
-    username = request.GET['in_username']
-    password = request.GET['in_password']
+    username = request.POST['in_username']
+    password = request.POST['in_password']
     # 去数据库用户表查询真假
     user = auth.authenticate(username=username, password=password)
     # 如果为假，不登录，重新返回登录注册页面
     if user is None:
-        return HttpResponseRedirect('/login/')
+        # return HttpResponse('密码错误')
+        return HttpResponse('0')
     # 如果为真，登录，跳转到项目列表页
     else:
         auth.login(request, user)
         request.session['user'] = username
-        return HttpResponseRedirect('/project_list/')
+        return HttpResponse('1')
 
 
 # 注销退出登录
@@ -127,11 +136,12 @@ def mock_list(request, project_id):
     res['buttons'] = [
         {"name": "新增单元", "href": f"/add_mock/{project.id}/", "icon": "folder"},
         {"name": "抓包导入", "href": "", "icon": "folder"},
-        {"name": "项目设置", "href": "", "icon": "folder"},
+        {"name": "项目设置", "href": "javascript:project_set()", "icon": "folder"},
         {"name": "启动服务", "href": "", "icon": "folder"},
         {"name": "关闭服务", "href": "", "icon": "folder"},
     ]
-    res['page_name'] = f"项目详情页: {project.name}"
+    res['page_name'] = f"项目详情页: 【{project.name}】"
+    res['project_id'] = project_id
     return render(request, 'mock_list.html', res)
 
 
