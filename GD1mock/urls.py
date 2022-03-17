@@ -22,6 +22,7 @@ urlpatterns = [
     path('project_list/', project_list),  # 项目列表页
     path('add_project/', add_project),  # 新增项目
     path('save_project/', save_project),  # 保存项目
+    path('project_data/', project_data),  # 获取项目数据
     re_path('del_project/(?P<pid>.+)/', del_project),  # 删除项目
     path('login/', login),  # 登录注册页面
     path('logout/', logout),  # 注销退出登录页面
@@ -33,4 +34,6 @@ urlpatterns = [
     re_path('mock_list/(?P<project_id>.+)/', mock_list),  # 项目列表页（mock 列表页）
     re_path('add_mock/(?P<project_id>.+)/', add_mock),  # 新增 mock 单元
     re_path('del_mock/(?P<mock_id>.+)/', del_mock),  # 删除 mock 单元
+    path('save_mock/', save_mock),  # 保存单元
+    path('get_mock/', get_mock),  # 获取 mock 单元的最新数据
 ]

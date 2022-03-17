@@ -1,3 +1,4 @@
+import json
 import random
 from django.conf import settings
 from django.contrib import auth
@@ -17,7 +18,7 @@ def project_list(request):
     project = DB_project.objects.all()
     buttons = [
         {"name": "新增项目", "href": "/add_project/", "icon": "folder"},
-        {"name": "项目数据", "href": "", "icon": "folder"}
+        {"name": "项目数据", "href": "javascript:project_data()", "icon": "database"}
     ]
     page_name = "项目列表页"
     return render(request, 'project_list.html', {"projects": project, "buttons": buttons, "page_name": page_name})
@@ -35,6 +36,24 @@ def save_project(request):
     project_id = request.GET['project_id']
     DB_project.objects.filter(id=project_id).update(name=new_name)
     return HttpResponse('')
+
+
+# 获取项目数据
+def project_data(request):
+    res = ''
+    projects = DB_project.objects.all()
+    for project in projects:
+        res += '【' + str(project.id) + '】-'
+        res += '【' + project.name + '】-'
+        res += '【' + project.creater + '】-'
+
+        # 单元数量
+        res += '【' + str(len(DB_mock.objects.filter(project_id=project.id))) + '】-'
+
+        res += '【' + str(project.run_counts) + '】-'
+        res += '【' + str(project.mock_counts) + '】'
+        res += '<br>'
+    return HttpResponse(res)
 
 
 # 删除项目
@@ -157,3 +176,23 @@ def del_mock(request, mock_id):
     project_id = mocks[0].project_id
     mocks.delete()
     return HttpResponseRedirect(f'/mock_list/{project_id}/')
+
+
+# 保存 mock 单元
+def save_mock(request):
+    mock_id = request.GET['mock_id']
+    mock_name = request.GET['mock_name']
+    catch_url = request.GET['catch_url']
+    mock_response_body = request.GET['mock_response_body']
+    DB_mock.objects.filter(id=mock_id).update(name=mock_name,
+                                              catch_url=catch_url,
+                                              mock_response_body=mock_response_body)
+    return HttpResponse('')
+
+
+# 获取 mock 单元的最新数据
+def get_mock(request):
+    mock_id = request.GET['mock_id']
+    mock = DB_mock.objects.filter(id=mock_id).values()[0]
+    res = {"mock": mock}
+    return HttpResponse(json.dumps(res), content_type='application/json')

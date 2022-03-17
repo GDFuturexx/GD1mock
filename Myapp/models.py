@@ -6,6 +6,8 @@ from django.db import models
 class DB_project(models.Model):
     name = models.CharField(max_length=30, null=True, blank=True)
     creater = models.CharField(max_length=30, null=True, blank=True)
+    run_counts = models.IntegerField(default=0)
+    mock_counts = models.IntegerField(default=0)
 
     def __str__(self):
         return '项目名称' + self.name

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>项目列表页</title>
     <link rel="stylesheet" href="/static/lightbox/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/lightbox/node_modules/prismjs/themes/prism-tomorrow.css"/>
     <style>
         th {
             text-align: center;
@@ -15,6 +16,11 @@
 
         button {
             margin-bottom: 0.5em;
+        }
+
+        .modal-dialog {
+            max-width: 720px;
+            margin: 1.75rem auto;
         }
     </style>
 </head>
@@ -49,5 +55,15 @@
     {% endfor %}
     </tbody>
 </table>
+<script src="/static/lightbox/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/lightbox/js/bootstrap-show-modal.js"></script>
+<script src="/static/lightbox/node_modules/prismjs/prism.js"></script>
+<script>
+    function project_data() {
+        $.get('/project_data/', {}, function (ret) {
+            $.showModal({title: "mock 测试平台当前项目数据如下：<br>【项目编号】-【项目标题】-【单元数量】-【启动次数】-【mock 次数】", body: ret})
+        })
+    }
+</script>
 </body>
 </html>
