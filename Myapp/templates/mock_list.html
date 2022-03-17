@@ -44,14 +44,14 @@
         <td>
             {{ i.name }}
         </td>
-        <td>
+        <td id="state_{{ i.id }}">
             {{ i.state }}
         </td>
         <td>
-            <a href="">
+            <a href="/mock_on/{{ i.id }}/">
                 <button type="button" class="btn btn-success">启用</button>
             </a>
-            <a href="">
+            <a href="/mock_off/{{ i.id }}/">
                 <button type="button" class="btn btn-danger">弃用</button>
             </a>
             <a href="javascript:mock_set('{{ i.id }}')">
@@ -62,6 +62,14 @@
             </a>
         </td>
     </tr>
+    <script>
+        color_state = document.getElementById('state_{{ i.id }}')
+        if ('{{ i.state }}' == 'True') {
+            color_state.style.color = 'green'
+        } else {
+            color_state.style.color = 'red'
+        }
+    </script>
     {% endfor %}
     </tbody>
 </table>
@@ -97,11 +105,13 @@
                     '</div>' +
                     '<div class="form-group row">' +
                     '<div class="col-3"><label for="text" class="col-form-label">抓包 url</label></div>' +
-                    '<div class="col-9"><input type="text" class="form-control" value="' + ret.mock.catch_url + '" id="catch_url" placeholder="写路由(可带参数)即可捕获到" /></div>' +
+                    '<div class="col-9"><input type="text" class="form-control" value="' + ret.mock.catch_url + '" id="catch_url" placeholder="写 url 内关键字" /></div>' +
                     '</div>' +
                     '<div class="form-group row">' +
                     '<div class="col-3"><label for="text" class="col-form-label">返回值更新策略</label></div>' +
-                    '<div class="col-9"><textarea id="mock_response_body" rows="5" class="form-control"  placeholder="每行一个规则，具体规则如下:">' + ret.mock.mock_response_body + '</textarea></div>' +
+                    '<div class="col-9"><textarea id="mock_response_body" rows="5" class="form-control"  placeholder="每行一个规则，具体规则如下：' +
+                    '字符串替换：旧字符串=>新字符串' +
+                    'json 路径替换：路径=真实值 比如 a.b.2=[1,2,3]">' + ret.mock.mock_response_body + '</textarea></div>' +
                     '</div>' +
                     '</form>',
                 footer: '<button type="button" class="btn btn-link" data-dismiss="modal">取消</button><button type="submit" class="btn btn-primary">保存</button>',

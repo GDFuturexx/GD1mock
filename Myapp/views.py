@@ -1,5 +1,10 @@
 import json
+import os
 import random
+import re
+import shutil
+import subprocess
+
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
@@ -17,7 +22,7 @@ from Myapp.models import *
 def project_list(request):
     project = DB_project.objects.all()
     buttons = [
-        {"name": "新增项目", "href": "/add_project/", "icon": "folder"},
+        {"name": "新增项目", "href": "/add_project/", "icon": "calendar-plus-o"},
         {"name": "项目数据", "href": "javascript:project_data()", "icon": "database"}
     ]
     page_name = "项目列表页"
@@ -26,7 +31,19 @@ def project_list(request):
 
 # 新增项目
 def add_project(request):
-    DB_project.objects.create(name='新项目', creater=request.user.username)
+    project = DB_project.objects.create(name='新项目', creater=request.user.username)
+    shutil.copy('Myapp/mitm_edits/mitm_edit.py', f'Myapp/mitm_edits/{project.id}_mitm_edit.py')
+    return HttpResponseRedirect('/project_list/')
+
+
+# 删除项目
+def del_project(request, pid):
+    DB_project.objects.filter(id=pid).delete()
+    DB_mock.objects.filter(project_id=pid).delete()
+    try:
+        os.remove(f'Myapp/mitm_edits/{pid}_mitm_edit.py')
+    except:
+        ...
     return HttpResponseRedirect('/project_list/')
 
 
@@ -54,14 +71,6 @@ def project_data(request):
         res += '【' + str(project.mock_counts) + '】'
         res += '<br>'
     return HttpResponse(res)
-
-
-# 删除项目
-def del_project(request, pid):
-    # print(pid)
-    DB_project.objects.filter(id=pid).delete()
-    DB_mock.objects.filter(project_id=pid).delete()
-    return HttpResponseRedirect('/project_list/')
 
 
 # 进入登录注册页面
@@ -153,13 +162,14 @@ def mock_list(request, project_id):
     # 根据项目 id 去数据库找出这个项目
     project = DB_project.objects.filter(id=project_id)[0]
     res['buttons'] = [
-        {"name": "新增单元", "href": f"/add_mock/{project.id}/", "icon": "folder"},
-        {"name": "抓包导入", "href": "", "icon": "folder"},
-        {"name": "项目设置", "href": "javascript:project_set()", "icon": "folder"},
-        {"name": "启动服务", "href": "", "icon": "folder"},
-        {"name": "关闭服务", "href": "", "icon": "folder"},
+        {"name": "新增单元", "href": f"/add_mock/{project.id}/", "icon": "plus-square"},
+        {"name": "抓包导入", "href": "", "icon": "cc"},
+        {"name": "项目设置", "href": "javascript:project_set()", "icon": "gear"},
+        {"name": "启动服务", "href": f"/server_on/{project_id}/", "icon": "check-square"},
+        {"name": "关闭服务", "href": f"/server_off/{project_id}/", "icon": "window-close"},
     ]
-    res['page_name'] = f"项目详情页: 【{project.name}】"
+    res['page_name'] = f"项目详情页：【{project.name}】" + '|| port：' + str(9000 + int(project_id))
+    res['project_state'] = '|| 服务状态：' + str(project.state)
     res['project_id'] = project_id
     return render(request, 'mock_list.html', res)
 
@@ -196,3 +206,65 @@ def get_mock(request):
     mock = DB_mock.objects.filter(id=mock_id).values()[0]
     res = {"mock": mock}
     return HttpResponse(json.dumps(res), content_type='application/json')
+
+
+# 启用 mock 单元
+def mock_on(request, mock_id):
+    mock = DB_mock.objects.filter(id=mock_id)
+    mock.update(state=True)
+    project_id = mock[0].project_id
+    return HttpResponseRedirect(f'/mock_list/{project_id}/')
+
+
+# 弃用 mock 单元
+def mock_off(request, mock_id):
+    mock = DB_mock.objects.filter(id=mock_id)
+    mock.update(state=False)
+    project_id = mock[0].project_id
+    return HttpResponseRedirect(f'/mock_list/{project_id}/')
+
+
+# 启动服务
+def server_on(request, project_id):
+    port = str(9000 + int(project_id))
+    script = 'Myapp/mitm_edits/' + project_id + '_mitm_edit.py'
+    cmd = f'mitmproxy -p {port} -s {script}'
+    subprocess.call(cmd, shell=True)
+    DB_project.objects.filter(id=project_id).update(state=True)
+    return HttpResponseRedirect(f'/mock_list/{project_id}/')
+
+
+# 关闭服务
+def server_off(request, project_id):
+    port = str(9000 + int(project_id))
+
+    # (macOS、Linux）
+    # cmd = f'ps -ef|grep mitm |grep {port}'
+    # res = subprocess.check_output(cmd, shell=True)
+
+    # Windows
+    res = subprocess.check_output('wmic process where caption="python.exe" get processid,commandline', shell=True)
+
+    for i in str(res).split(r'\n'):
+        if 'python.exe' in i:
+        # if project_id + '_mitm_edit.py' in i:
+
+            # (macOS、Linux）
+            # pid = max([int(i) for i in re.findall(r'\d+', i.split('/')[0])])
+
+            # Windows
+            pid = max([int(i) for i in re.findall(r'\d+', i.split('\\')[-3])])
+
+            # (macOS、Linux）
+            # cmd2 = f'kill -9 {str(pid)}'
+            # subprocess.check_output(cmd2, shell=True)
+
+            # Windows
+            subprocess.call(f'taskkill /T /F /PID {pid}', shell=True)
+
+            print('进程已杀死！')
+            break
+    else:
+        print('进程未找到！')
+    DB_project.objects.filter(id=project_id).update(state=False)
+    return HttpResponseRedirect(f'/mock_list/{project_id}/')

@@ -36,4 +36,8 @@ urlpatterns = [
     re_path('del_mock/(?P<mock_id>.+)/', del_mock),  # 删除 mock 单元
     path('save_mock/', save_mock),  # 保存单元
     path('get_mock/', get_mock),  # 获取 mock 单元的最新数据
+    re_path('mock_on/(?P<mock_id>.+)/', mock_on),  # 启用 mock 单元
+    re_path('mock_off/(?P<mock_id>.+)/', mock_off),  # 弃用 mock 单元
+    re_path('server_on/(?P<project_id>.+)/', server_on),  # 启动服务
+    re_path('server_off/(?P<project_id>.+)/', server_off),  # 关闭服务
 ]
