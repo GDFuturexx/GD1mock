@@ -14,7 +14,14 @@
     <div class="bar">
         <button id="navbox-trigger" class="navbox-trigger"><i class="fa fa-lg fa-th"></i></button>
         <strong><span style="color: white">{{ page_name }}</span></strong>
-        <strong><span style="color: white">{{ project_state }}</span></strong>
+        &nbsp;<strong><span id="project_state">{{ project_state }}</span></strong>
+        <script>
+            if ('{{ project_state }}'.indexOf('True') == -1) {
+                document.getElementById('project_state').style.color = 'red'
+            } else {
+                document.getElementById('project_state').style.color = 'green'
+            }
+        </script>
     </div>
     <div class="navbox">
         <div class="navbox-tiles">

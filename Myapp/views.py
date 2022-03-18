@@ -161,6 +161,14 @@ def mock_list(request, project_id):
     res['mocks'] = DB_mock.objects.filter(project_id=project_id)
     # 根据项目 id 去数据库找出这个项目
     project = DB_project.objects.filter(id=project_id)[0]
+    # 拿到当前平台ip
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
     res['buttons'] = [
         {"name": "新增单元", "href": f"/add_mock/{project.id}/", "icon": "plus-square"},
         {"name": "抓包导入", "href": "", "icon": "cc"},
@@ -168,8 +176,8 @@ def mock_list(request, project_id):
         {"name": "启动服务", "href": f"/server_on/{project_id}/", "icon": "check-square"},
         {"name": "关闭服务", "href": f"/server_off/{project_id}/", "icon": "window-close"},
     ]
-    res['page_name'] = f"项目详情页：【{project.name}】" + '|| port：' + str(9000 + int(project_id))
-    res['project_state'] = '|| 服务状态：' + str(project.state)
+    res['page_name'] = f'项目详情页：【{project.name}】' + '【host】：' + ip + '【port】：' + str(9000 + int(project_id))
+    res['project_state'] = '服务状态：' + str(project.state)
     res['project_id'] = project_id
     return render(request, 'mock_list.html', res)
 
@@ -188,15 +196,24 @@ def del_mock(request, mock_id):
     return HttpResponseRedirect(f'/mock_list/{project_id}/')
 
 
-# 保存 mock 单元
+# 保存mock单元
 def save_mock(request):
     mock_id = request.GET['mock_id']
     mock_name = request.GET['mock_name']
     catch_url = request.GET['catch_url']
     mock_response_body = request.GET['mock_response_body']
+    model = request.GET['model']
+    response_headers = request.GET['response_headers']
+    state_code = request.GET['state_code']
+    mock_response_body_lj = request.GET['mock_response_body_lj']
     DB_mock.objects.filter(id=mock_id).update(name=mock_name,
                                               catch_url=catch_url,
-                                              mock_response_body=mock_response_body)
+                                              mock_response_body=mock_response_body,
+                                              model=model,
+                                              response_headers=response_headers,
+                                              state_code=state_code,
+                                              mock_response_body_lj=mock_response_body_lj,
+                                              )
     return HttpResponse('')
 
 
@@ -224,12 +241,27 @@ def mock_off(request, mock_id):
     return HttpResponseRedirect(f'/mock_list/{project_id}/')
 
 
-# 启动服务
+# # 启动服务
+# def server_on(request, project_id):
+#     port = str(9000 + int(project_id))
+#     script = 'Myapp/mitm_edits/' + project_id + '_mitm_edit.py'
+#     cmd = f'mitmproxy -p {port} -s {script}'
+#     subprocess.call(cmd, shell=True)
+#     DB_project.objects.filter(id=project_id).update(state=True)
+#     return HttpResponseRedirect(f'/mock_list/{project_id}/')
+
+
+# 线程控制启动服务
 def server_on(request, project_id):
-    port = str(9000 + int(project_id))
-    script = 'Myapp/mitm_edits/' + project_id + '_mitm_edit.py'
-    cmd = f'mitmproxy -p {port} -s {script}'
-    subprocess.call(cmd, shell=True)
+    import threading
+    def abc():
+        port = str(9000 + int(project_id))
+        script = 'Myapp/mitm_edits/' + project_id + '_mitm_edit.py'
+        cmd = f'nohup mitmdump -p {port} -s {script}'
+        subprocess.call(cmd, shell=True)
+
+    t = threading.Thread(target=abc)
+    t.start()
     DB_project.objects.filter(id=project_id).update(state=True)
     return HttpResponseRedirect(f'/mock_list/{project_id}/')
 
@@ -247,7 +279,7 @@ def server_off(request, project_id):
 
     for i in str(res).split(r'\n'):
         if 'python.exe' in i:
-        # if project_id + '_mitm_edit.py' in i:
+            # if project_id + '_mitm_edit.py' in i:
 
             # (macOS、Linux）
             # pid = max([int(i) for i in re.findall(r'\d+', i.split('/')[0])])
